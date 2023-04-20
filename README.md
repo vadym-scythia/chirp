@@ -1,4 +1,7 @@
-# Create T3 App
+# chirp
+Emoji only twitter clone implemented as T3 App.
+Based on [this](https://youtu.be/YkOSUVzOAA4) tutorial. 
+## Create T3 App
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
 
