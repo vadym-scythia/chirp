@@ -1,6 +1,7 @@
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
+import { LoadingPage } from "~/components/loading"
 
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -13,8 +14,6 @@ dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
-
-  console.log(user);
 
   if (!user) return null;
 
@@ -39,13 +38,23 @@ const PostView = (props: PostWithUser) => {
     </div>);
 }
 
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+
+  if (postsLoading) return <LoadingPage />;
+
+  if (!data) return <div>Something went wrong</div>
+
+  return (<div className="flex flex-col">
+    {[...data, ...data]?.map((fullPost) => (<PostView {...fullPost} key={fullPost.post.id} />))}
+  </div>);
+}
+
 const Home: NextPage = () => {
-  const user = useUser();
-  const { data, isLoading } = api.posts.getAll.useQuery();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+  api.posts.getAll.useQuery();
 
-  if (isLoading) return <div>Loading...</div>;
-
-  if (!data) return <div>No data</div>
+  if (!userLoaded) return <div />;
 
   return (
     <>
@@ -57,12 +66,11 @@ const Home: NextPage = () => {
       <main className="flex justify-center h-screen">
         <div className="h-full w-full md:max-w-2xl border-slate-400 border-x">
           <div className="border-b border-slate-400 p-4 flex">
-            {!user.isSignedIn && <div className="flex justify-center"><SignInButton /></div>}
-            {user.isSignedIn && <CreatePostWizard />}
+            {!isSignedIn && <div className="flex justify-center"><SignInButton /></div>}
+            {isSignedIn && <CreatePostWizard />}
           </div>
-          <div className="flex flex-col">
-            {[...data, ...data]?.map((fullPost) => <PostView {...fullPost} key={fullPost.post.id} />)}
-          </div>
+
+          <Feed />
         </div>
       </main>
     </>
